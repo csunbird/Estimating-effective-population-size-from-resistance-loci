@@ -1,0 +1,57 @@
+//This code is the primary template for the burn-ins. Some code may be incomplete in other scripts or different to this one, but this is the most accurate. 
+initialize() {
+
+
+        // Use tree-sequence recording to speed up burn-in
+        initializeTreeSeq();
+
+        defineConstant('pop_size',100);
+        //defineConstant('T_N',10*pop_size);
+        defineConstant('ge_length',70000);
+        defineConstant('sweep_site',integerDiv((ge_length+1),2));
+        defineConstant('low_site',sweep_site-1);
+        defineConstant('high_site',1+sweep_site);
+        
+
+        defineConstant('recombination_rate',0.00025);
+        defineConstant('mut_rate',0.00025);
+        //defineConstant('T_mu', 10/mut_rate); //round it
+        defineConstant('nucleotide_diversity', (4*pop_size*mut_rate)/(1+(2*4*pop_size*mut_rate)));
+        initializeRecombinationRate(recombination_rate);
+        initializeMutationRate(mut_rate);
+
+        // m1 is a neutral mutation
+        initializeMutationType('m0', 0.5, 'f', 0.0);
+        m0.mutationStackPolicy = "l";   
+
+        initializeGenomicElementType('g1', m0, 1.0 );
+        initializeGenomicElement(g1, 0, low_site);
+        initializeGenomicElement(g1, sweep_site, sweep_site);
+        initializeGenomicElement(g1, high_site, ge_length);}
+
+
+1 early(){
+	sim.addSubpop("p0", pop_size);
+}
+//this command was later added to various files on the high-performance computer.
+1:1000 late(){
+	div = calcHeterozygosity(p0.genomes);
+	catn(sim.cycle +","+ div);
+}
+       
+//conditional termination of somulation based on val of nucleotide diversity
+500:39999 late() {
+div = calcHeterozygosity(p0.genomes);
+if(div >= nucleotide_diversity*1.1){ // if(div >= nucleotide_diversity){
+sim.simulationFinished();
+catn('number of generations taken ' + sim.cycle);
+sim.treeSeqOutput("burnin_no.1_early_10.trees");
+}
+}
+
+
+// Run burn-in for ~10/mu generations
+40000 late() {
+        // Output recorded tree-sequence
+        sim.treeSeqOutput("burnin_no.1._10_.trees");
+}
