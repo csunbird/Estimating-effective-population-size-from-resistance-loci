@@ -1,7 +1,7 @@
 # FYP: Why is my population size so small? Estimating recent effective population sizes from resistance loci in Anopheles gambiae
 # Supervised by: Dr Khatri Bhavin
 # Undergraduate Final Year Project
-Code used during my undergraduate final year project, with much previous work done by Anushka Thawani, TSH11 and other previous students on this project.
+Code used during my undergraduate final year project, with much previous work done by Anushka Thawani, Theo Sebastian Hemmant and other previous students on this project.
 
 ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/ff3f4113-f50d-4b9a-96bb-4a251441bcb4/d5456eda-ea49-4f82-a78d-d03f249a4bb8/Untitled.png)
 
