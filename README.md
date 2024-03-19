@@ -22,3 +22,37 @@ Calculate haplotype lengths, max, minimum nt.
 ## Haplotype graph tests
 Work done by TSH11, Anusha and previous students
 TO DO: Add my own calculated graph etc
+
+
+
+
+
+### Current Status
+## Update questions:
+
+- how many ticks in a **burn in** simulation (10,000? or just until fixation)
+- what size of genome,  (find in FYP report)
+- what kind of mutations do i want to sweep?? (parameters for mutations)
+
+- how many repeats of the soft sweep simulations?
+    - just 1 subpopulation
+
+- ask about what do examiners want to see in my poster?
+
+## Progress since last update (14 march):
+
+- drafted hpc job script, the python script and am drafting the slim script ( modify for parameters)
+- started github
+- got access to RDS on my PC
+- almost done w python script for calculating TMRCA… stuck at last step
+
+## plan for rest of this week
+
+1. trial one SLIM simulation on my own PC, 
+2. trial 1 simulation from burn in on HPC to get idea of how many cores etc I need 
+3. then save the data to the RDS
+4. troubleshoot my job script and SLIM/Python script for simulations
+5. draft the poster and ask josh for feedback
+
+1. set the HPC to run all my simulations over EASTer 
+2. (optional/over easter) finish TMRCA python calculation

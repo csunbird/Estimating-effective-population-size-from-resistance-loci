@@ -1,5 +1,5 @@
 // Initialize parameters
-defineConstant("NUM_COMBINATIONS", 27) //for the for loop to go through all 27 combinations
+defineConstant("NUM_COMBINATIONS", 27) 
 defineConstant("NUM_GENERATIONS", 10000)
 
 // Initialize arrays to store parameters
@@ -21,6 +21,7 @@ initializeParameters() {
         burn_in_files[i] = tokens[3]
         i += 1
     }
+//initialise mutations? 
 
 
 // Main simulation
@@ -38,9 +39,21 @@ main() {
         mu = mutation_rates[current_combination]
         r = recombination_rates[current_combination]
         
-        // Run selective sweep simulation for 10,000 generations
-        simulateSelectiveSweep(N, mu, r)
         
+        // Read burn-in population from file
+        1 late() { sim.readFromPopulationFile(burn_in_files[current_combination])}
+        //modify mutation to sweep
+        1000:100000 late() {
+ sweep = sim.mutationsOfType(m1)} //what kind of mutations do i want to sweep??
+        
+		100000 late() {
+ 		catn("TIME EXPIRED");
+		sim.simulationFinished();
+} 
         
     }
 }
+
+
+// Run selective sweep simulation for 10,000 generations
+        //simulateSelectiveSweep(N, mu, r)
