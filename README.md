@@ -40,16 +40,19 @@ SLIM Burn in Code but NO simulated burn in populations from previous students
 - ask about what do examiners want to see in my poster?
 
 ### Progress since last update meeting (19 March):
-- 
+- fixed Theo's Burn in SLIM code
+- edit SLIM simulation to have VGSC mutation parameters
+- trial one SLIM simulation on my own PC (4 cores, definitely more than 1 day to run)
+
 
 ### Planned work till 29 March:
-1. edit SLIM to have VGSC mutation parameters
-2. trial one SLIM  simulation on my own PC
+1. 
+2. troubleshoot my job script and SLIM/Python script for simulations
 3. write script to run all the burn in simulations in HPC (in case Theo does not reply Dr Khatri)
 4. use the python code to write a test.vcf file (lots of 0,1 etc)
 5. trial 1 simulation from burn in on HPC to get idea of how many cores etc I need 
 6. then save the data to the RDS
-7. troubleshoot my job script and SLIM/Python script for simulations
+
 
 ### planned work over EASTER
 1. set the HPC to run all my simulations over Easter break (with as many repeats)

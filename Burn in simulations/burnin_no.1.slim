@@ -1,14 +1,16 @@
+// Just for burn in 1
+
 initialize() {
     // Use tree-sequence recording to speed up burn-in
     initializeTreeSeq();
     
     defineConstant('pop_size', 100);
-    defineConstant('ge_length', 70000);
-    defineConstant('sweep_site', integerDiv((ge_length + 1), 2));
+    defineConstant('ge_length', 10000); //changed to 10kb haplotype size following prev student's thesis
+    defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene
     defineConstant('low_site', sweep_site - 1);
     defineConstant('high_site', 1 + sweep_site);
     
-    defineConstant('recombination_rate', 0.000025);
+    defineConstant('recombination_rate', 0.00025);
     defineConstant('mut_rate', 0.00025);
     defineConstant('nucleotide_diversity', (4 * pop_size * mut_rate) / (1 + (2 * 4 * pop_size * mut_rate)));
     
@@ -54,14 +56,10 @@ initialize() {
         if (div >= nucleotide_diversity * 1.1) {
             sim.simulationFinished();
             catn('number of generations taken ' + sim.cycle);
-            sim.treeSeqOutput("burnin_no.2_early.trees");
+            sim.treeSeqOutput("burnin_no.1_early_10.trees");
         }
     }
 }
 40000 late() {
-    sim.treeSeqOutput("burnin_no.2.late.trees");
+    sim.treeSeqOutput("burnin_no.1._10_.trees");
 }
-
-
-
-
