@@ -1,0 +1,94 @@
+// array burn ins
+
+initialize() {
+	// Use tree-sequence recording to speed up burn-in
+	initializeTreeSeq();
+	
+	defineConstant("NUM_COMBINATIONS", 27);
+	defineConstant("NUM_GENERATIONS", 10000);
+	// Initialize arrays to store simulation parameters
+	N_values = int[27];
+	mutation_rates = float[27];
+	recombination_rates = float[27];
+	burn_in_files = string[27];
+	
+	// Read parameter combinations from parameter combinations.txt file
+	i = 0;
+	file = "parameter combinations.txt";
+	for (line in file) {
+		tokens = line.split("\t");
+		N_values[i] = int(tokens[0]);
+		mutation_rates[i] = float(tokens[1]);
+		recombination_rates[i] = float(tokens[2]);
+		burn_in_files[i] = tokens[3];
+		i = i + 1;
+		
+		
+		defineConstant('ge_length', 10000); //changed to 10kb haplotype size following prev student's thesis
+		defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene
+		defineConstant('low_site', sweep_site - 1);
+		defineConstant('high_site', 1 + sweep_site);
+		
+		defineConstant('nucleotide_diversity', (4 * pop_size * mut_rate) / (1 + (2 * 4 * pop_size * mut_rate)));
+		
+		initializeRecombinationRate(recombination_rate);
+		initializeMutationRate(mut_rate);
+		
+		// Define a neutral mutation
+		initializeMutationType('m0', 0.5, 'f', 0.0);
+		m0.mutationStackPolicy = "l";
+		
+		// Initialize genomic types
+		initializeGenomicElementType('g1', m0, 1.0);
+		initializeGenomicElement(g1, 0, low_site);
+		initializeGenomicElement(g1, sweep_site, sweep_site);
+		initializeGenomicElement(g1, high_site, ge_length);
+		initializeGenomicElementType('g2', m0, 1.0);
+	}
+	
+	main(); {
+		initialize();
+		
+		// Iterate through parameter combinations
+		for (current_combination in 1:NUM_COMBINATIONS) {
+			// Set parameters for current combination
+			N = N_values[current_combination];
+			mu = mutation_rates[current_combination];
+			r = recombination_rates[current_combination];
+			
+			
+			1; early(); {
+				//REMEMBER TO DEFINE INDIVIDUAL
+				// Make individuals diploid and assign genomes
+				for (individual in sim.subpopulations.individuals) {
+					individual.addGenomicElement(g1, 1.0);  // Add genome 1
+					individual.addGenomicElement(g2, 1.0);  // Add genome 2
+				}
+				sim.addSubpop("p0", pop_size);
+			}
+			
+			//this command was later added to various files on the high-performance computer.
+			1:1000 ;late();{
+				div = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+				catn(sim.cycle +","+ div);
+			}
+			
+			500:39999; late(); {
+				div = 0; //initialise div
+				// Calculate pair heterozygosity
+				for (individual in sim.subpopulations.individuals) {
+					div = (div + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = T))/ pop_size ;
+					if (div >= nucleotide_diversity * 1.1) {
+						sim.simulationFinished();
+						catn('number of generations taken ' + sim.cycle);
+						sim.treeSeqOutput("burnin_no." + current_combination+ "_early_10.trees");
+					}
+				}
+			}
+			
+			40000; late(); {
+				sim.treeSeqOutput("burnin_no." + current_combination+ "._10_.trees");
+			}
+		}
+	}
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -N run_cheyanne_burnin6
+#PBS -N run_cheyanne_burnin4
 #PBS -j oe
 #PBS -k oe
 
@@ -50,7 +50,7 @@ source activate slim
 ## command timed to get mem and wallclock info
 ##
 
-slim  ~/burnins/burnin_no.6.txt 
+slim  ~/burnins/burnin_no.4.txt 
 
 ## move LOGFILE to cwd
 ##
