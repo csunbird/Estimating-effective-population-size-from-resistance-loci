@@ -10,6 +10,13 @@ initialize() {
 	recombination_rates = float[27];
 	burn_in_files = string[27];
 	
+	
+	//Get job array index from command line
+	array_index = getParameter("PBS_ARRAY_INDEX");
+	
+	// Convert the index to an integer
+	array_index = strToInt(array_index);
+	
 	// Read parameter combinations from parameter combinations.txt file
 	i = 0;
 	file = "parameter combinations.txt";
@@ -21,9 +28,9 @@ initialize() {
 		burn_in_files[i] = tokens[3];
 		i = i + 1;
 		
-	//initialise sweep mutation
-	initializeMutationType('m1', 1.0, 'f', 1.0); //vgsc mutation with 1.0 selection coeff, complete dominance, fixed fitness effect
-    m0.mutationStackPolicy = "l";
+		//initialise sweep mutation
+		initializeMutationType('m1', 1.0, 'f', 1.0); //vgsc mutation with 1.0 selection coeff, complete dominance, fixed fitness effect
+		m0.mutationStackPolicy = "l";
 	}
 	
 	// Main simulation
@@ -32,38 +39,40 @@ initialize() {
 		
 		// Iterate through parameter combinations
 		for (current_combination in 1:NUM_COMBINATIONS) {
-			// Read burn-in population from file
-			readFromPopulationFile(burn_in_files[current_combination]);
-			
-			// Set parameters for current combination
-			N = N_values[current_combination];
-			mu = mutation_rates[current_combination];
-			r = recombination_rates[current_combination];
-			
-			// Read burn-in population from file
-			early() ;{
-				sim.readFromPopulationFile(burn_in_files[current_combination]);
-				sweep = sim.mutationsOfType(m1); 
-			}
-			
-			// Modify mutation to sweep
-			1000:100000 ;
-			late(); {
-				heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
-				if (heterozygosity >= 0.8 ) {
-					sim.simulationFinished();
-					catn('number of generations taken ' + sim.cycle);
-					sim.treeSeqOutput("combination " + current_combination + " simulation.trees");
+			if (current_combination == array_index){
+				// Read burn-in population from file
+				readFromPopulationFile(burn_in_files[current_combination]);
 				
+				// Set parameters for current combination
+				N = N_values[current_combination];
+				mu = mutation_rates[current_combination];
+				r = recombination_rates[current_combination];
+				
+				// Read burn-in population from file
+				early() ;{
+					sim.readFromPopulationFile(burn_in_files[current_combination]);
+					sweep = sim.mutationsOfType(m1);
 				}
-			}
-			
-			// Additional late() block for cutoff time point
-			100000 ;
-			late() ;{
-				catn("TIME EXPIRED");
-				sim.simulationFinished();
-				sim.treeSeqOutput("combination " + current_combination + " simulation_expired.trees");
+				
+				// Modify mutation to sweep
+				1000:100000 ;
+				late(); {
+					heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+					if (heterozygosity >= 0.8 ) {
+						sim.simulationFinished();
+						catn('number of generations taken ' + sim.cycle);
+						sim.treeSeqOutput("combination " + current_combination + " simulation.trees");
+					
+					}
+				}
+				
+				// Additional late() block for cutoff time point
+				100000 ;
+				late() ;{
+					catn("TIME EXPIRED");
+					sim.simulationFinished();
+					sim.treeSeqOutput("combination " + current_combination + " simulation_expired.trees");
+				}
 			}
 		}
 	}

@@ -6,10 +6,10 @@
 
 #PBS -m ae
 
-#PBS -l walltime=48:00:00
-#PBS -l select=1:ncpus=8:mem=2gb      
+#PBS -l walltime=72:00:00
+#PBS -l select=1:ncpus=12:mem=2gb      
 
-#PBS -J 1-10
+#PBS -J 1-27
 
 ## NB values for ncpus and mem are allocated
 ## to each node (specified by select=N)
@@ -53,26 +53,8 @@ source activate slim
 ##
 
 
-input="parameter_combinations.txt"
+slim -d seed=$PBS_ARRAY_INDEX  ~/simulations/sweep simulation.txt
 
-## Get the row number based on PBS_ARRAY_INDEX environment variable
-array_index=$PBS_ARRAY_INDEX
-
-## Read the specified row from the parameter combinations file
-params=$(sed -n "${array_index}p" "$input")
-
-## Split the row into individual parameters
-IFS=',' read -r -a params_array <<< "$params"
-
-## Extract parameters and process them
-counter=0
-for param in "${params_array[@]}"
-do
-    ((counter++))
-    echo "Processing element ${counter}: ${param}"
-    ## Run your SLIM script with the parameters here
-    slim -d seed=$PBS_ARRAY_INDEX  ~/simulations/sweep simulation.txt
-done
 
 ## move LOGFILE to cwd
 ##
