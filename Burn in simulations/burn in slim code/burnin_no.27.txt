@@ -1,16 +1,16 @@
-//Burn in 7
+//Burn in 27
 
 initialize() {
     // Use tree-sequence recording to speed up burn-in
     initializeTreeSeq();
     
-    defineConstant('pop_size', 100);
+    defineConstant('pop_size', 10000);
     defineConstant('ge_length', 10000); //changed to 10kb haplotype size following prev student's thesis
     defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene
     defineConstant('low_site', sweep_site - 1);
     defineConstant('high_site', 1 + sweep_site);
     
-    defineConstant('recombination_rate', 0.000250);
+    defineConstant('recombination_rate', 0.000003);
     defineConstant('mut_rate', 0.000003);
     defineConstant('nucleotide_diversity', (4 * pop_size * mut_rate) / (1 + (2 * 4 * pop_size * mut_rate)));
     
@@ -29,10 +29,10 @@ initialize() {
     initializeGenomicElementType('g2', m0, 1.0);
     
     //print out parameters
-    print("population size:" + pop_size);
-    print ("recombination rate:" + recombination_rate);
-    print("mutation rate:" + mut_rate);
-    print("genome size:" + ge_length);
+	print("population size:" + pop_size);
+	print ("recombination rate:" + recombination_rate);
+	print("mutation rate:" + mut_rate);
+	print("genome size:" + ge_length);
     }
     
     
@@ -62,10 +62,10 @@ initialize() {
         if (div >= nucleotide_diversity * 1.1) {
             sim.simulationFinished();
             catn('number of generations taken ' + sim.cycle);
-            sim.treeSeqOutput("burnin_no.7_early_10.trees");
+            sim.treeSeqOutput("burnin_no.27_early_10.trees");
         }
     }
 }
 40000 late() {
-    sim.treeSeqOutput("burnin_no.7._10_.trees");
+    sim.treeSeqOutput("burnin_no.27._10_.trees");
 }

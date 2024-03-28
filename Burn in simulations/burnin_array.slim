@@ -67,21 +67,28 @@ initialize() {
 	
 	initializeRecombinationRate(0);
 	initializeMutationRate(0);
-	
+
 }
 
 1 early() {
 	// Iterate through parameter combinations
 	for (current_combination in 0:(NUM_COMBINATIONS-1)) {
 		// Set parameters for current combination
-		N = N_values[current_combination]; 
+		N = N_values[current_combination];
 		mu = mutation_rates[current_combination];
 		r = recombination_rates[current_combination];
-		}
-		
-		defineConstant('nucleotide_diversity', (4 * N * mu) / (1 + (2 * 4 * N * mu)));
-			
-		
+	}
+	
+	defineConstant('nucleotide_diversity', (4 * N * mu) / (1 + (2 * 4 * N * mu)));
+	
+	//print out parameters for checking on job logfile
+	print("population size:" + pop_size);
+	print ("recombination rate:" + recombination_rate);
+	print("mutation rate:" + mut_rate);
+	print("genome size:" + ge_length);
+	
+	
+	
 	sim.addSubpop("p0", N);
 	// Make individuals diploid and assign genomes
 	for (individual in sim.subpopulations.individuals) {
@@ -113,5 +120,3 @@ initialize() {
 40000 late() {
 	sim.treeSeqOutput("burnin_no." + current_combination+ "._10_.trees");
 }
-
-

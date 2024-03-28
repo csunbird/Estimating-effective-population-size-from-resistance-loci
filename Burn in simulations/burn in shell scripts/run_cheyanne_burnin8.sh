@@ -49,7 +49,7 @@ source activate slim
 
 ## command timed to get mem and wallclock info
 ##
-
+/usr/bin/time -v \
 slim  ~/burnins/burnin_no.8.txt 
 
 ## move LOGFILE to cwd

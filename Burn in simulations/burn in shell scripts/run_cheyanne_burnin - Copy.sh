@@ -51,7 +51,7 @@ source activate slim
 
 ## command timed to get mem and wallclock info
 ##
-
+/usr/bin/time -v \
 slim -d seed=$PBS_ARRAY_INDEX -d mut_rate=0.00025 -d recombination_rate=0.00025 -d pop_size=100 ~/path/to/burnin_no.1.txt   ### Then supply your command. Either write the code here, or in a separate shell script that you then call on here.
 
 ## move LOGFILE to cwd
