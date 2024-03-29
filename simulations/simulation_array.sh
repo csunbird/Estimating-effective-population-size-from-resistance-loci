@@ -52,8 +52,8 @@ source activate slim
 ## command timed to get mem and wallclock info
 ##
 
-
-slim -d seed=$PBS_ARRAY_INDEX  ~/simulations/sweep simulation.txt
+/usr/bin/time -v \
+slim -d seed=$PBS_ARRAY_INDEX  ~/simulations/sweep_simulation.txt
 
 
 ## move LOGFILE to cwd
