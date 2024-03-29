@@ -39,22 +39,26 @@ SLIM Burn in Code but NO simulated burn in populations from previous students
 
 # Current Status
 ### Update questions:
-- #why do we use the Farthest Point Algorithm in the dendrogram clustering??
+- why do we use the Farthest Point Algorithm in the dendrogram clustering??
+- can we do our neutral burn in for 10N generations (page 597 of SLIM manual)
+- are we supposed select a mutation to sweep from the pool of neutral mutations? no right?
 
 ### Progress since last update meeting (19 March):
 - fixed Theo's Burn in SLIM code
-- 18 burn ins done on HPC
+- 27 burn ins done on HPC
 - burn in array job IS PROBLEMATIC
 
-- edited SLIM simulation to have VGSC mutation parameters
+- edited SLIM simulation to have VGSC mutation parameters, introduced sweep, trying to introduce seed loop
+- is it possible for seed loop to be after the sim block? ask the community?
 - trial one SLIM simulation on my own PC (4 cores, definitely more than 1 day to run)
 
 - finished TMRCA python calculation code block
-- At clustering/ draw dendrogram codeblock now
+- At clustering/ draw dendrogram with coloured tips for mutations codeblock now
 
+- began poster
 
 ### Planned work till 29 March:
-1. draft the poster and ask josh for feedback
+1. ask josh for feedback
 2. troubleshoot my array job script and SLIM/Python script for simulations
 3. ~~write script to run all the burn in simulations in HPC (in case Theo does not reply Dr Khatri)~~
 4. use the python code to write a test.vcf file (lots of 0,1 etc)
@@ -63,4 +67,3 @@ SLIM Burn in Code but NO simulated burn in populations from previous students
 
 ### planned work over EASTER
 1. set the HPC to run all my simulations over Easter break (with as many repeats)
-2. ~~finish TMRCA python calculation, add codeblock to cluster and draw tree with tips coloured for mutations. adapt for figures later~~
