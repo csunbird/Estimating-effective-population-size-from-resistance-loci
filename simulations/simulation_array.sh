@@ -7,7 +7,7 @@
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=12:mem=2gb      
+#PBS -l select=1:ncpus=12:mem=10gb      
 
 #PBS -J 1-27
 

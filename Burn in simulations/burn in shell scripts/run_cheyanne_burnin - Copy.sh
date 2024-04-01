@@ -6,7 +6,7 @@
 
 #PBS -m ae
 
-#PBS -l walltime=48:00:00	###change this to set your time (hh:mm:ss)
+#PBS -l walltime=72:00:00	###change this to set your time (hh:mm:ss)
 #PBS -l select=1:ncpus=4:mem=5gb       ###leave select at 1, choose your cpus and memory
 
 #PBS -J 1-10
