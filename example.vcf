@@ -1,0 +1,21 @@
+#OUT: 10000 10000 GV 20
+##fileformat=VCFv4.2
+##fileDate=20160613
+##source=SLiM
+##slimGenomePedigreeIDs=4999898,4999899,...
+##INFO=<ID=MID,Number=1,Type=Integer,Description="Mutation ID in SLiM">
+##INFO=<ID=S,Number=1,Type=Float,Description="Selection Coefficient">
+##INFO=<ID=DOM,Number=1,Type=Float,Description="Dominance">
+##INFO=<ID=PO,Number=1,Type=Integer,Description="Population of Origin">
+##INFO=<ID=TO,Number=1,Type=Integer,Description="Tick of Origin">
+##INFO=<ID=MT,Number=1,Type=Integer,Description="Mutation Type">
+##INFO=<ID=AC,Number=1,Type=Integer,Description="Allele Count">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=MULTIALLELIC,Number=0,Type=Flag,Description="Multiallelic">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT i0 i1 i2 i3 i4 i5...
+1 1309 . A T 1000 PASS
+MID=987550;S=0;DOM=0.5;PO=2;TO=9404;MT=1;AC=11;DP=1000 GT 0|1 0|0 0|1...
+1 5995 . A T 1000 PASS
+MID=987764;S=0;DOM=0.5;PO=1;TO=9415;MT=1;AC=11;DP=1000 GT 0|1 0|0 0|1...
+...

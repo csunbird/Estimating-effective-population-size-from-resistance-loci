@@ -7,7 +7,7 @@
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=12:mem=10gb      
+#PBS -l select=1:ncpus=24:mem=15gb      
 
 #PBS -J 1-27
 
@@ -53,7 +53,7 @@ source activate slim
 ##
 
 /usr/bin/time -v \
-slim -d seed=$PBS_ARRAY_INDEX  ~/simulations/sweep_simulation.txt
+slim -d array_index=$PBS_ARRAY_INDEX -d seedID=2505954171 ~/simulations/sweep_simulation.txt
 
 
 ## move LOGFILE to cwd
