@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#PBS -N run_cheyanne_burnin4
+#PBS -N run_burnin4
 #PBS -j oe
 #PBS -k oe
 
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=12:mem=5gb     
+#PBS -l select=1:ncpus=50:mem=10gb      
 
 ## NB values for ncpus and mem are allocated
 ## to each node (specified by select=N)

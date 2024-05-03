@@ -31,7 +31,7 @@ SLIM Burn in Code but NO simulated burn in populations from previous students
 
 
 ### Progress since 19 March:
-- 18 burn ins done on HPC
+- 18 burn ins done on HPC, made heterozygosity user-defined function + track progress to csv using logfile
 completed by me: 1-9, 13-18, 25-27
 replaced by Theo's burnins: 10-12, 19-23 (NOTE: wrong calculation method used in calculating heterozygosity)
 missing: burn in 24
@@ -41,13 +41,21 @@ missing: burn in 24
 - did poster
 
 ### Planned work this week
-- finish burnins! (trial running calc at timepoints 2/5/24) (about 50 min to reach timepoint 4000)
+- finish burnins! (trial running calc at timepoints 2/5/24) (8.5 hr to reach gen 40k)
 - change sweep site nonsense in simulation SLIM script (done)
-- fix and run simulation array with theos burn ins to fill gaps
+- fix and run simulation array with theos burn ins to fill gaps (sunday after burnins are done)
 - (post-simulation) plot nuc diversity graph for all simulations and compare against expected (has to be 10%<nuc diversity>20%)
 - begin report writing
 - HPC drop in to figure out why output file stops outputting after 1000 generations (book 48hr before tuesday)
 
+
+# Optimising HPC work
+- burn in trial 1, data seems to show calcPairHeterozygosity plateaus about 0.0002... may never reach 10% heterozygosity? 
+- took 8.5 hr to reach gen 40k and terminate (achieved optimisation!)
+![alt text](image-1.png)
+
+- trial 2 using logfile taking the incorrect heterozygosity measure every 1000 gen, and also increase the expiry point from 40k to 100k gen to see if there is indeed a plateau. removed a lot of savepoints as now we know the burnin can finish under 72 hr.
+- now can redo all the burnins to standardise at 100k gen if it doesnt terminate earlier
 
 # Answered questions
 - how many ticks in a simulation (till 80% fixation for VGSC and 40% for RDL)

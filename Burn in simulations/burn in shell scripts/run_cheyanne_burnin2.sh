@@ -1,15 +1,13 @@
 #!/bin/bash
 
-#PBS -N run_cheyanne_burnin1    ### Change this to set the name of your script
+#PBS -N run_burnin2
 #PBS -j oe
 #PBS -k oe
 
 #PBS -m ae
 
-#PBS -l walltime=72:00:00	###change this to set your time (hh:mm:ss)
-#PBS -l select=1:ncpus=4:mem=5gb       ###leave select at 1, choose your cpus and memory
-
-#PBS -J 1-10
+#PBS -l walltime=72:00:00
+#PBS -l select=1:ncpus=50:mem=10gb     
 
 ## NB values for ncpus and mem are allocated
 ## to each node (specified by select=N)
@@ -46,13 +44,14 @@ echo ------------------------------------------------------
 
 ## load common modules as standard
 ##
-module load anaconda3/personal   ### load any modules you need here (e.g. vcftools, ibdseq). To see a list of available modules, use "module avail" on your login node
+module load anaconda3/personal  
 source activate slim
 
 ## command timed to get mem and wallclock info
 ##
+
 /usr/bin/time -v \
-slim -d seed=$PBS_ARRAY_INDEX -d mut_rate=0.00025 -d recombination_rate=0.00025 -d pop_size=100 ~/path/to/burnin_no.1.txt   ### Then supply your command. Either write the code here, or in a separate shell script that you then call on here.
+slim  ~/burnins/burnin_no.2.txt 
 
 ## move LOGFILE to cwd
 ##

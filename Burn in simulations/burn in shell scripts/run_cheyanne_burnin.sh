@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#PBS -N run_cheyanne_burnin6
+#PBS -N run_burnin1
 #PBS -j oe
 #PBS -k oe
 
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=12:mem=5gb      
+#PBS -l select=1:ncpus=50:mem=10gb     
 
 ## NB values for ncpus and mem are allocated
 ## to each node (specified by select=N)
@@ -51,7 +51,7 @@ source activate slim
 ##
 
 /usr/bin/time -v \
-slim  ~/burnins/burnin_no.6.txt 
+slim  ~/burnins/burnin_no.1.txt 
 
 ## move LOGFILE to cwd
 ##
