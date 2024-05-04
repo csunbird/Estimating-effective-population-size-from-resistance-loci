@@ -5,7 +5,7 @@ initialize() {
 	//defineConstant("seedID", 1811758731);
 	defineConstant("NUM_COMBINATIONS", 27);
 	defineConstant('ge_length', 10000); //10kb haplotype 
-	defineConstant('sweep_site', 5000); //just roughly middle of vgsc gene
+	defineConstant('sweep_site', 5000); //just roughly middle of vgsc gene, at position 5000
 	defineConstant('low_site', sweep_site - 1);
 	defineConstant('high_site', 1 + sweep_site);
 	
@@ -16,7 +16,7 @@ initialize() {
 	mutationStackPolicy = "l";
 	initializeMutationType("m0", 0.5, "f", 0.0); //neutral mutation
 	initializeMutationType("m1", 0.5, "f", 0.02); // introduced sweep mutation dominance is likely partial 
-	//selection coeff could be 0.02 Khatri et al (e best fit selection coefficient as  0:017)
+	//selection coeff could be 0.02. Khatri et al (e best fit selection coefficient as  0:017)
 	
 	// Initialize genomic types
 	initializeGenomicElementType('g1', m0, 1.0);
@@ -47,20 +47,11 @@ initialize() {
 		burn_in_files[i] = asInteger(tokens[3]);
 		i = i + 1;
 	}
-	//
-	//if (!exists("array_index"))
-	//defineConstant(array_index, $PBS_ARRAY_INDEX);
-	
-	//Get job array index from command line
-	//array_index = $PBS_ARRAY_INDEX; //ERROR its not picking up the command line parameter
-	print(type(array_index));
-	// Convert the index to an integer
-	//array_index = strToInt(array_index);
 	
 	// Set parameters for current combination
-	N = N_values[array_index];
-	mu = mutation_rates[array_index];
-	r = recombination_rates[array_index];
+	N = N_values[array_index-1];
+	mu = mutation_rates[array_index-1];
+	r = recombination_rates[array_index-1];
 	
 	initializeMutationRate(mu);
 	initializeRecombinationRate(r);
@@ -80,23 +71,48 @@ initialize() {
 
 }
 
-
-// Main simulation, label sweep start as s1
-s1 1 early() {
-	// Read burn-in population from file
-	sim.readFromPopulationFile("burnin_no." + array_index + "._10_.trees");
+// define function to calculate population heterozygosity (correct version)
+function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
+{
+	sum =0;
+	div=0;
+	for (individual in sim.subpopulations.individuals) {
+		sum = sum + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = T);
+	}
+	div = sum/pop_size;
+	return div;
 }
 
-s2 1 late() {
+
+
+
+
+// Main simulation, label sweep start as s1
+1 early() {
+	// Read burn-in population from file
+	sim.readFromPopulationFile("burnin_no." + array_index + "_complete.trees");
+	
+	//setting tick number from the read in population file back to 1
+	community.tick=1;
+	
+	// logfile
+	log = community.createLogFile(array_index + '_'+ seedID +".csv", logInterval=1000);
+	log.addCustomColumn("Array Index", "array_index;");
+	log.addCustomColumn("SeedID", "seedID;");
+	log.addCycle();
+	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
+}
+
+1 late() {
 	sweep = sim.mutationsOfType(m1);
 	// Modify mutation to sweep
-	target = (p0.genomes, 1); //chooses one genome in the subpopulation to add the sweep mutation into
+	target = sample(p0.genomes, 1); //chooses one genome in the subpopulation to add the sweep mutation into
 	target.addNewDrawnMutation(m1, 5000); //add sweep mutation m1 at position 5000 in target genome
 }
 
 //calculate heterozygosity at set timepoints
 1000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -105,7 +121,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -113,7 +129,7 @@ s2 1 late() {
 }
 
 2000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -122,7 +138,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -130,7 +146,7 @@ s2 1 late() {
 }
 
 3000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -139,7 +155,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -147,7 +163,7 @@ s2 1 late() {
 }
 
 4000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -156,7 +172,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -164,7 +180,7 @@ s2 1 late() {
 }
 
 5000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -173,7 +189,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -181,7 +197,7 @@ s2 1 late() {
 }
 
 6000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -190,7 +206,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -198,7 +214,7 @@ s2 1 late() {
 }
 
 7000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -207,7 +223,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -215,7 +231,7 @@ s2 1 late() {
 }
 
 8000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -224,7 +240,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -233,7 +249,7 @@ s2 1 late() {
 
 
 9000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -242,7 +258,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -250,7 +266,7 @@ s2 1 late() {
 }
 
 10000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -259,7 +275,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -267,7 +283,7 @@ s2 1 late() {
 }
 
 15000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -276,7 +292,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -284,7 +300,7 @@ s2 1 late() {
 }
 
 20000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -293,7 +309,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -301,7 +317,7 @@ s2 1 late() {
 }
 
 25000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -310,7 +326,7 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -318,7 +334,7 @@ s2 1 late() {
 }
 
 30000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -327,7 +343,24 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+35000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -335,7 +368,7 @@ s2 1 late() {
 }
 
 40000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -344,7 +377,24 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+45000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -352,7 +402,7 @@ s2 1 late() {
 }
 
 50000 late(){
-	heterozygosity = calcHeterozygosity(sim.subpopulations.individuals.genomes);
+	heterozygosity = estimatepop_Heterozygosity(p0);
 	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
 	if (heterozygosity >= 0.8 ) {
 		sim.simulationFinished();
@@ -361,7 +411,280 @@ s2 1 late() {
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(N, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+55000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+60000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+70000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+80000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+90000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+100000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+
+110000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+120000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+130000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+130000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+140000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+150000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+160000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+170000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+180000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	//else 
+}
+
+190000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', seed_ID: ' + seedID + ', heterozygosity: ' + heterozygosity);
+	if (heterozygosity >= 0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "/simulations/" +array_index + '_'+ seedID +'.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
@@ -369,7 +692,9 @@ s2 1 late() {
 }
 
 // Additional late() block for cutoff time point
-100000 late(){
+200000 late(){
+	heterozygosity = estimatepop_Heterozygosity(p0);
+	catn('generation: ' + sim.cycle +', heterozygosity: ' + heterozygosity);
 	catn("array index, seedID: "+ array_index + "," + seedID + " TIME EXPIRED");
 	sim.simulationFinished();
 	sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_expired.trees");

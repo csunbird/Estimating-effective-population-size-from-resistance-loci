@@ -60,12 +60,12 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	
 	
 	//logfile heterozygosity at set timepoints
-	log = community.createLogFile("burnin19_logfile.csv", logInterval=1000);
+	log = community.createLogFile("burnin25_logfile.csv", logInterval=1000);
 	log.addCycle();
 	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
 	
 	//if taking from burn in early termination
-	//sim.readFromPopulationFile("burnin_no.19_savepoint1000.trees");
+	//sim.readFromPopulationFile("burnin_no.25_savepoint1000.trees");
 
 }
 
@@ -86,7 +86,7 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 1000 late(){
 	div = estimatepop_Heterozygosity(p0);
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 
@@ -96,11 +96,11 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 
@@ -109,11 +109,11 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 
@@ -123,11 +123,11 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 
@@ -137,11 +137,11 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 
@@ -151,10 +151,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 40000 late() {
@@ -162,10 +162,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 50000 late() {
@@ -173,10 +173,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 60000 late() {
@@ -184,10 +184,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 70000 late() {
@@ -195,10 +195,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 80000 late() {
@@ -206,10 +206,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 90000 late() {
@@ -217,15 +217,15 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	if (div >= nucleotide_diversity * 1.1) {
 		sim.simulationFinished();
 		catn('number of generations taken ' + sim.cycle);
-		sim.treeSeqOutput("burnin_no.19_complete.trees");
+		sim.treeSeqOutput("burnin_no.25_complete.trees");
 	}
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_savepoint.trees");
+	sim.treeSeqOutput("burnin_no.25_savepoint.trees");
 }
 
 //terminate the burn in 
 100000 late() {
 	div = estimatepop_Heterozygosity(p0);
 	catn(sim.cycle +","+ div);
-	sim.treeSeqOutput("burnin_no.19_terminated_100000.trees");
+	sim.treeSeqOutput("burnin_no.25_terminated_100000.trees");
 }
