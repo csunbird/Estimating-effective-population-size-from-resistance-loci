@@ -8,42 +8,40 @@ Code used during my undergraduate final year project, with much previous work do
 ![alt text](image.png)
 
 ### Burn in simulations
-SLIM Burn in Code but NO simulated burn in populations from previous students
+completed by me: all burnins run (all finished before termination point 100k ticks)
+Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosity [theo's burnins are missing no.24]
 
 ### Running SLIM simulations via HPC 
-- made parameter combination.txt, and draft job script
-- TO DO: currently drafting python script (slim code)
+- made parameter combination.txt, and job script
+- run simulations (BUT most of them do not reach 0.8 heterozygosity, only terminate at termination point 1000k)
 
 
-### Python code
-- almost done with TMRCA code
-- TO DO: cluster by TMRCA and draw tree with tips coloured for mutations. adapt for figures later
+### Post-Simulation Python code
+- done with TMRCA code
+- TO CHECK: cluster by TMRCA and draw tree with tips coloured for mutations. adapt for figures later
+- STUCK AT: how to get estimated curve of best fit? for NeHat function
 
 
 ### Haplotype graph tests
 - Work done by TSH11, Anusha and previous students
-- TO DO: Add my own calculated graphs etc
 
 
-# Current Status
+
+# Current Status: Done with simulations
 ### Update questions:
 - contact HPC (drop in on Tuesdays 2-6pm only)
 
 
 ### Progress since 19 March:
-- 25 burn ins done on HPC, made heterozygosity user-defined function + track progress to csv using logfile
-completed by me: everything except 17 (terminated at 100k gen without reaching 10% heterozygosity) and 19 (both still running)
-replaced by Theo's burnins: 10-12, 19-23 (NOTE: wrong calculation method used in calculating heterozygosity) [theo's burnins are missing no.24]
-
-- issue with burn in 19-24, 10-12... keeps timing out because of pop size and heterozygosity calculation i think
+- all 27 burn ins done on HPC, made heterozygosity user-defined function + track progress to csv using logfile
 - finished TMRCA python calculation code block, simulation array and trialled it.
 - did poster
 
 ### Planned work this week
-- finish burnins! (trial running calc at timepoints 2/5/24) (8.5 hr to reach gen 40k)
+- finish burnins! (done)
 - change sweep site nonsense in simulation SLIM script (done)
-- fix and run simulation array (ongoing)
-- (calc tmrca) calculating NeHat by maximum likelihood estimation (STUCK HERE, how to get estimated curve of best fit?)
+- fix and run simulation array (done)
+- (tmrca.ipynb) calculating NeHat by maximum likelihood estimation (STUCK HERE, how to get estimated curve of best fit?)
 - (post-simulation) plot nuc diversity graph for all simulations and compare against expected (has to be 10%<nuc diversity>20%)
 
 - begin report writing
@@ -52,11 +50,13 @@ replaced by Theo's burnins: 10-12, 19-23 (NOTE: wrong calculation method used in
 
 # Optimising HPC work
 - most burnins reach 10% heterozygosity between 10-100k gen
-- took 8.5 hr to reach gen 40k and terminate (achieved optimisation!)
+- trial 1 took 8.5 hr to reach gen 40k and terminate (achieved optimisation!)
 ![alt text](image-1.png)
 
-- trial 2 using logfile taking the incorrect heterozygosity measure every 1000 gen, and also increase the expiry point from 40k to 100k gen to see if there is indeed a plateau. removed a lot of savepoints as now we know the burnin can finish under 72 hr.
-- optimising simulations, termination block at 200k gen to catch any long simulations
+- trial 2 using logfile took user-defined heterozygosity function every 1000 ticks, and also increase the expiry point from 40k to 100k gen to see if there is indeed a plateau. removed a lot of savepoints as now we know the burnin can finish under 72 hr.
+
+- optimising simulations, termination block at 1000k gen to catch any long simulations (most dont finish at 200k)
+- issue outputting vcf by even the ones that finish ahead of termination, hopefully resolved by removing filepath
 
 # Answered questions
 - how many ticks in a simulation (till 80% fixation for VGSC and 40% for RDL)
@@ -67,4 +67,3 @@ replaced by Theo's burnins: 10-12, 19-23 (NOTE: wrong calculation method used in
 - why do we use the Farthest Point Algorithm in the dendrogram clustering?? Should be average UPGMA algorithm
 - can we do our neutral burn in for 10N generations (page 597 of SLIM manual) incase not enough coalescence? record the number of generations first
 - calculate heterozygosity every set timepoint instead of every generation for problematic burn ins
-- burn in trial 1, data seems to show calcPairHeterozygosity plateaus about 0.0002... may never reach 10% heterozygosity? 
