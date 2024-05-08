@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -N simulation_array_seed1
+#PBS -N simulation_array_seed5
 #PBS -j oe
 #PBS -k oe
 
@@ -53,7 +53,7 @@ source activate slim
 ##
 
 /usr/bin/time -v \
-slim -d array_index=$PBS_ARRAY_INDEX -d seedID=1811758731 ~/simulations/sweep_simulation.txt
+slim -d array_index=$PBS_ARRAY_INDEX -d seedID=786513423 ~/simulations/sweep_simulation.txt
 
 
 ## move LOGFILE to cwd

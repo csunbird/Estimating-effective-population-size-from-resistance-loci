@@ -735,8 +735,8 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 // Additional late() block for cutoff time point at 1000k 
 1000000 late(){
 	heterozygosity = estimatepop_Heterozygosity(p0);
-	catn('generation: ' + sim.cycle +', heterozygosity: ' + heterozygosity);
 	catn("array index, seedID: "+ array_index + "," + seedID + " TIME EXPIRED");
+	catn('generation: ' + sim.cycle +', heterozygosity: ' + heterozygosity);
 	sim.simulationFinished();
 	sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_expired.trees");
 }
