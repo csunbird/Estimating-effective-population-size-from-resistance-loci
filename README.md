@@ -22,7 +22,6 @@ Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosit
 ### Post-Simulation Python code
 - done with TMRCA code
 - TO CHECK: cluster by TMRCA and draw tree with tips coloured for mutations. adapt for figures later
-- STUCK AT: how to get estimated curve of best fit? for NeHat function
 
 
 ### Haplotype graph tests
@@ -30,9 +29,11 @@ Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosit
 
 
 
-# Current Status: Done with simulations
+# Current Status: Done with seed 1 simulations
 ### Update questions:
-- contact HPC (drop in on Tuesdays 2-6pm only)
+- confused with the post-simulation check... 
+    Plot nucleotide diversity for each simulation and also separately 
+    plot number of independent gene loci/origins (L) against population size (N) for each population size?
 
 
 ### Progress since 19 March:
@@ -50,7 +51,6 @@ Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosit
 - (post-simulation) plot nuc diversity graph for all simulations and compare against expected (has to be 10%<nuc diversity>20%)
 
 - begin report writing
-- HPC drop in to figure out why output file stops outputting after 1000 generations (book 48hr before tuesday)
 
 
 # Optimising HPC work
