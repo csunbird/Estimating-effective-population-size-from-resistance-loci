@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#PBS -N cheyanne_burnin_array
+#PBS -N 70kb_burnin_array
 #PBS -j oe
 #PBS -k oe
 
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=50:mem=20gb      
+#PBS -l select=1:ncpus=50:mem=15gb      
 
 #PBS -J 1-27
 
@@ -51,8 +51,9 @@ source activate slim
 
 ## command timed to get mem and wallclock info
 ##
+
 /usr/bin/time -v \
-slim  -d array_index=$PBS_ARRAY_INDEX ~/burnins/burnin_array.txt 
+slim -d array_index=$PBS_ARRAY_INDEX -d seedID=1811758731  ~/burnins/burnin_array.txt 
 
 ## move LOGFILE to cwd
 ##

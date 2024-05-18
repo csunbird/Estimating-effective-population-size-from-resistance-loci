@@ -3,7 +3,7 @@
 initialize() {
 	// Use tree-sequence recording to speed up burn-in
 	initializeTreeSeq();
-	defineConstant('ge_length', 70000); //changed to 70kb haplotype size following prev student's thesis
+	defineConstant('ge_length', 70000); //changed to 70kb haplotype size, same as actual vgsc 
 	defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene
 	defineConstant('low_site', sweep_site - 1);
 	defineConstant('high_site', 1 + sweep_site);
@@ -41,7 +41,7 @@ initialize() {
 		mutation_rates[i] = asFloat(tokens[1]);
 		recombination_rates[i] = asFloat(tokens[2]);
 		burn_in_files[i] = asInteger(tokens[3]);
-		//pi_nucleotide_diversity[i] = asFloat(tokens[6]);
+		pi_nucleotide_diversity[i] = asFloat(tokens[6]);
 		
 		i = i + 1;
 	}
@@ -50,20 +50,12 @@ initialize() {
 	N = N_values[array_index-1];
 	mu = mutation_rates[array_index-1];
 	r = recombination_rates[array_index-1];
-	//pi = pi_nucleotide_diversity[array_index-1];
+	pi = pi_nucleotide_diversity[array_index-1];
 	
 	initializeMutationRate(mu);
 	initializeRecombinationRate(r);
 	defineConstant('pop_size', N);
-	//defineConstant('nucleotide_diversity', pi);
-	
-	// define function to calculate pi, the nucleotide diversity 
-	//if burn in has reached mutation-drift balance, pi is at expected theoretical mean heterozygosity and 
-	//pi = theta/(1+2theta)
-	//theta is population-scaled mutation rate and is theta=4(Ne)(mutation rate)
-	theta = 4*mu*pop_size;
-	pi = theta/(1+2*theta);
-	termination_point =1.1*pi;
+	defineConstant('nucleotide_diversity', pi);
 	
 	
 	//seed is 
@@ -75,20 +67,22 @@ initialize() {
 	print("population size:" + pop_size);
 	print ("recombination rate:" + r);
 	print("mutation rate:" + mu);
-	print("1.1*pi(termination point):" + termination_point);
-	//print('terminate at nucleotide diversity:'+ nucleotide_diversity);
+	print('nucleotide diversity:'+ nucleotide_diversity);
 	print("genome size:" + ge_length);
 
 }
 
-
+// define function to calculate pi, the nucleotide diversity 
+//if burn in has reached mutation-drift balance, pi is at expected theoretical mean heterozygosity and 
+//pi = theta/(1+2theta)
+//theta is population-scaled mutation rate and is theta=4(Ne)(mutation rate)
 
 function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 {
 	sum =0;
 	div=0;
 	for (individual in sim.subpopulations.individuals) {
-		sum = sum + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = F);
+		sum = sum + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = T);
 	}
 	div = sum/pop_size;
 	return div;
@@ -124,7 +118,7 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 		div = estimatepop_Heterozygosity(p0);
 		//if tick number is greater than 5N, check if nucleotide_diversity >10% 
 		if (sim.cycle >= 5 * pop_size){
-			if (div >= termination_point) {
+			if (div >= nucleotide_diversity * 1.1) {
 				sim.simulationFinished();
 				catn('number of generations taken: ' + sim.cycle);
 				sim.treeSeqOutput("burnin_no." + array_index +"_complete.trees");

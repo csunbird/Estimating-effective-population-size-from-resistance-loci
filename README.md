@@ -12,20 +12,16 @@ https://imperiallondon-my.sharepoint.com/:f:/g/personal/cqs21_ic_ac_uk/Egu0jDWKC
 
 ### Burn in simulations
 completed by me: all burnins run (all finished before termination point 100k ticks)
-Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosity [theo's burnins are missing no.24]
+Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosity [theo's burnins are missing no.24-27]
 
 ### Running SLIM simulations via HPC 
 - made parameter combination.txt, and job script
-- run simulations (BUT most of them do not reach 0.8 heterozygosity, only terminate at termination point 1000k)
+- run simulations 
 
 
 ### Post-Simulation Python code
 - done with TMRCA code
 - TO CHECK: cluster by TMRCA and draw tree with tips coloured for mutations. adapt for figures later
-
-
-### Haplotype graph tests
-- Work done by TSH11, Anusha and previous students
 
 
 
@@ -36,32 +32,22 @@ Theo's burnins: NOTE: wrong calculation method used in calculating heterozygosit
     plot number of independent gene loci/origins (L) against population size (N) for each population size?
 
 
+80% theta /(1+2theta)
+
 ### Progress since 19 March:
-- all 27 burn ins done on HPC, made heterozygosity user-defined function + track progress to csv using logfile
+- burnin array on HPC, made heterozygosity user-defined function + track progress to csv using logfile
 - finished TMRCA python calculation code block, simulation array
-- finished simulations. output vcf for 10,11,19-23. Expired at 1000k for the rest.
 - did poster
 
 ### Planned work this week
-- finish burnins! (done)
-- change sweep site nonsense in simulation SLIM script (done)
-- fix and run simulation array for first seed (done)
-- write array scripts for 9 other seeds and run them
-- (tmrca.ipynb) calculating NeHat by maximum likelihood estimation (STUCK HERE, how to get estimated curve of best fit?)
+- 70kb burnins
+- try to run theos and my simulations
+- test post simulation check and tmrca/dendrogram on theos vcf file (they are all test files??)
+- run 10 simulation arrays for the 10 seeds
 - (post-simulation) plot nuc diversity graph for all simulations and compare against expected (has to be 10%<nuc diversity>20%)
+- finish methods, intro and abstract by monday
 
-- begin report writing
 
-
-# Optimising HPC work
-- most burnins reach 10% heterozygosity between 10-100k gen
-- trial 1 took 8.5 hr to reach gen 40k and terminate (achieved optimisation!)
-![alt text](image-1.png)
-
-- trial 2 using logfile took user-defined heterozygosity function every 1000 ticks, and also increase the expiry point from 40k to 100k gen to see if there is indeed a plateau. removed a lot of savepoints as now we know the burnin can finish under 72 hr.
-
-- optimising simulations, termination block at 1000k gen to catch any long simulations (most dont finish at 200k)
-- VCF files take up >20gb each! switch to outputting in .tree? or compute all the following steps Then tar.gz the entire simulation folder before running other seeds
 
 
 # Answered questions

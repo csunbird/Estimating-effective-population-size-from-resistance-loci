@@ -5,7 +5,7 @@ initialize() {
 	//defineConstant("seedID", 1811758731);
 	defineConstant("NUM_COMBINATIONS", 27);
 	defineConstant('ge_length', 70000); //70kb haplotype 
-	defineConstant('sweep_site', 35000); //just roughly middle of vgsc gene, at position 35000
+	defineConstant('sweep_site', 5000); //just roughly middle of vgsc gene, at position 5000
 	defineConstant('low_site', sweep_site - 1);
 	defineConstant('high_site', 1 + sweep_site);
 	
@@ -29,7 +29,7 @@ initialize() {
 	// Initialize arrays to store simulation parameters
 	N_values = integer(27, fill1=0);
 	mutation_rates = float(27);
-	recombination_rates = float(27);
+	retheo_combination_rates = float(27);
 	burn_in_files = integer(27, fill1=0);
 	pi_nucleotide_diversity = float(27);
 	
@@ -44,7 +44,7 @@ initialize() {
 		//print("Tokens:"+ tokens);  
 		N_values[i] = asInteger(tokens[0]);
 		mutation_rates[i] = asFloat(tokens[1]);
-		recombination_rates[i] = asFloat(tokens[2]);
+		retheo_combination_rates[i] = asFloat(tokens[2]);
 		burn_in_files[i] = asInteger(tokens[3]);
 		pi_nucleotide_diversity[i] = asFloat(tokens[5]);
 		
@@ -54,7 +54,7 @@ initialize() {
 	// Set parameters for current combination
 	N = N_values[array_index-1];
 	mu = mutation_rates[array_index-1];
-	r = recombination_rates[array_index-1];
+	r = retheo_combination_rates[array_index-1];
 	pi = pi_nucleotide_diversity[array_index-1];
 	
 	initializeMutationRate(mu);
@@ -77,16 +77,7 @@ initialize() {
 
 }
 
-function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
-{
-	sum =0;
-	div=0;
-	for (individual in sim.subpopulations.individuals) {
-		sum = sum + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = F);
-	}
-	div = sum/pop_size;
-	return div;
-}
+
 
 
 
@@ -103,12 +94,11 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	catn('starting cycle no.: ' + sim.cycle);
 	
 	// logfile
-	log = community.createLogFile(array_index + '_'+ seedID +".csv", logInterval=100);
+	log = community.createLogFile("theo_"+ array_index + '_'+ seedID +".csv", logInterval=100);
 	log.addCustomColumn("Array Index", "array_index;");
 	log.addCustomColumn("SeedID", "seedID;");
 	log.addCycle();
 	log.addCustomColumn("Allele Frequency", "sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));");
-	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
 	
 	// Add and modify mutation to sweep
 	sweep = sim.mutationsOfType(m1);
@@ -129,8 +119,8 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 		catn(array_index +','+ seedID + ': swept to 40%');
 		catn('number of generations taken: ' + sim.cycle);
 		
-		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
-		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "theo_" + array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("theo_combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
 	if (allele_frequency >=0.8 ) {
@@ -140,8 +130,8 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
-		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "theo_" + array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("theo_combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
 }
@@ -156,8 +146,8 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 		catn(array_index +','+ seedID + ': swept to 40%');
 		catn('number of generations taken: ' + sim.cycle);
 		
-		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
-		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "theo_" + array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("theo_combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
 	if (allele_frequency >=0.8 ) {
@@ -167,10 +157,10 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
-		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
-		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = "theo_" + array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("theo_combination_" + array_index + "_" + seedID + "_simulation.trees");
 	
 	}
 	sim.simulationFinished();
-	sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_expired.trees");
+	sim.treeSeqOutput("theo_combination_" + array_index + "_" + seedID + "_expired.trees");
 }
