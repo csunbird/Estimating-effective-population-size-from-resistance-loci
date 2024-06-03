@@ -7,9 +7,9 @@
 #PBS -m ae
 
 #PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=50:mem=15gb      
+#PBS -l select=1:ncpus=70:mem=50gb      
 
-#PBS -J 1-27
+#PBS -J 22-27
 
 ## NB values for ncpus and mem are allocated
 ## to each node (specified by select=N)

@@ -5,7 +5,7 @@ initialize() {
 	//defineConstant("seedID", 1811758731);
 	defineConstant("NUM_COMBINATIONS", 27);
 	defineConstant('ge_length', 70000); //70kb haplotype 
-	defineConstant('sweep_site', 35000); //just roughly middle of vgsc gene, at position 35000
+	defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene, at position 35000
 	defineConstant('low_site', sweep_site - 1);
 	defineConstant('high_site', 1 + sweep_site);
 	
@@ -88,6 +88,17 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	return div;
 }
 
+function (integer)count_lineages(o<Subpopulation>$ subpop)
+{
+	// Count the number of lineages that have a frequency above the threshold
+	//Threshold = 1/(2*sample size of 200 genomes from 100 individuals) = 1/(2*200) =  2.5e-3
+	count = 0;
+	for (i in sim.mutationFrequencies(p0, sim.mutationsOfType(m1)) )
+		if (i>=2.5e-3) {
+			count = count + 1;}
+	return count;
+}
+
 
 
 
@@ -102,6 +113,9 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	//sim.cycle = 1
 	catn('starting cycle no.: ' + sim.cycle);
 	
+	// The p0.tag variable will be used to store the number of independent lineages.
+	p0.tag = 0;
+	
 	// logfile
 	log = community.createLogFile(array_index + '_'+ seedID +".csv", logInterval=100);
 	log.addCustomColumn("Array Index", "array_index;");
@@ -109,6 +123,7 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	log.addCycle();
 	log.addCustomColumn("Allele Frequency", "sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));");
 	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
+	log.addCustomColumn("No_lineages", "count_lineages(p0);");
 	
 	// Add and modify mutation to sweep
 	sweep = sim.mutationsOfType(m1);
@@ -122,21 +137,30 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 
 //calculate allele frequency at set timepoints
 
-2:1999 late(){
+2:199999 late(){
 	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
 	catn('Generation: ' + sim.cycle +', seed_ID: ' + seedID + ', Allele Frequency: ' + allele_frequency);
+	catn('No. of lineages: '+ count_lineages(p0)) ;
 	if (allele_frequency >=0.4 ) {
 		catn(array_index +','+ seedID + ': swept to 40%');
 		catn('number of generations taken: ' + sim.cycle);
 		
 		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
 		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		
+		// Count the number of lineages that have a frequency above the threshold
+		catn('No. of lineages: '+ count_lineages(p0)) ;
 	
 	}
+	
 	if (allele_frequency >=0.8 ) {
 		sim.simulationFinished();
 		catn(array_index +','+ seedID + ': swept to 80%');
-		catn('number of generations taken: ' + sim.cycle);
+		catn('number of generations taken: ' + sim.cycle +", lineage(s):"+ p0.tag);
+		
+		// Count the number of lineages that have a frequency above the threshold
+		//Threshold = 1/(2*sample size of 200 genomes from 100 individuals) = 1/(2*200) =  2.5e-3
+		catn('No. of lineages: '+ count_lineages(p0)) ;
 		
 		//output random sample of individuals from population as vcf files? 
 		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
@@ -148,10 +172,12 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 
 
 // Additional late() block for cutoff time point at 2000tick
-2000 late(){
+200000 late(){
 	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
 	catn("array index, seedID: "+ array_index + "," + seedID + " TIME EXPIRED");
 	catn('generation: ' + sim.cycle +', Allele Frequency: ' + allele_frequency);
+	catn('No. of lineages: '+ count_lineages(p0)) ;
+	
 	if (allele_frequency >=0.4 ) {
 		catn(array_index +','+ seedID + ': swept to 40%');
 		catn('number of generations taken: ' + sim.cycle);

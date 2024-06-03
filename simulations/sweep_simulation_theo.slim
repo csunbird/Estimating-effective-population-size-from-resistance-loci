@@ -5,7 +5,7 @@ initialize() {
 	//defineConstant("seedID", 1811758731);
 	defineConstant("NUM_COMBINATIONS", 27);
 	defineConstant('ge_length', 70000); //70kb haplotype 
-	defineConstant('sweep_site', 5000); //just roughly middle of vgsc gene, at position 5000
+	defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene, at position 35000
 	defineConstant('low_site', sweep_site - 1);
 	defineConstant('high_site', 1 + sweep_site);
 	
@@ -86,7 +86,7 @@ initialize() {
 
 1 late() {
 	// Read burn-in population from file
-	sim.readFromPopulationFile("burnin_no." + array_index + "_complete.trees");
+	sim.readFromPopulationFile("burnin_no." + array_index + ".trees");
 	
 	//setting tick number from the read in population file back to 1
 	//community.tick=1;
@@ -112,7 +112,7 @@ initialize() {
 
 //calculate allele frequency at set timepoints
 
-2:1999 late(){
+2:199999 late(){
 	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
 	catn('Generation: ' + sim.cycle +', seed_ID: ' + seedID + ', Allele Frequency: ' + allele_frequency);
 	if (allele_frequency >=0.4 ) {
@@ -137,8 +137,8 @@ initialize() {
 }
 
 
-// Additional late() block for cutoff time point at 2000tick
-2000 late(){
+// Additional late() block for cutoff time point at 200000 tick
+200000 late(){
 	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
 	catn("array index, seedID: "+ array_index + "," + seedID + " TIME EXPIRED");
 	catn('generation: ' + sim.cycle +', Allele Frequency: ' + allele_frequency);

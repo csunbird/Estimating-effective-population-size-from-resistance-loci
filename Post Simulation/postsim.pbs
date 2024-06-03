@@ -1,0 +1,24 @@
+#!/bin/bash
+
+mkdir dendrograms
+cd dendrograms
+
+for i in `seq 1 27`
+do
+    My_Dir="dendrograms_"${i}
+    My_Job=$My_Dir
+
+    mkdir $My_Dir
+    cd $My_Dir
+
+    echo '#PBS -l walltime=72:00:00' > result.pbs
+    echo '#PBS -l select=1:ncpus=70:mem=70gb' >> result.pbs
+    echo 'export seed=1811758731' >> result.pbs
+    echo 'cd $PBS_O_WORKDIR' >> result.pbs
+    echo 'module load anaconda3/personal scipy matplotlib' >> result.pbs  # Ensure the correct Python modules are loaded
+    echo 'python ~/simulations/postsimulation/CQS21_calculating_TMRCA.py' >> result.pbs  # where my Python script is
+
+    qsub -N "postsim_job_"${i} result.pbs
+
+    cd ..
+done

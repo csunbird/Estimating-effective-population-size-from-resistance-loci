@@ -1,0 +1,202 @@
+// simulation 19
+//Initialize parameters
+initialize() {
+	// Use tree-sequence recording to speed up burn-in
+	initializeTreeSeq();
+	//defineConstant("seedID", 1811758731);
+	defineConstant("NUM_COMBINATIONS", 27);
+	defineConstant('ge_length', 70000); //70kb haplotype 
+	defineConstant('sweep_site', integerDiv((ge_length + 1), 2)); //just roughly middle of vgsc gene, at position 35000
+	defineConstant('low_site', sweep_site - 1);
+	defineConstant('high_site', 1 + sweep_site);
+	
+	
+	//initialise mutations
+	//initialise VGSC sweep mutation
+	//1.0 selection coeff, complete dominance, fixed fitness effect
+	mutationStackPolicy = "l";
+	initializeMutationType("m0", 0.5, "f", 0.0); //neutral mutation
+	initializeMutationType("m1", 0.5, "f", 0.02); // introduced sweep mutation dominance is likely partial 
+	//selection coeff could be 0.02. Khatri et al (the best fit selection coefficient as  0:017)
+	
+	// Initialize genomic types
+	initializeGenomicElementType('g1', m0, 1.0);
+	initializeGenomicElement(g1, 0, low_site);
+	initializeGenomicElement(g1, high_site, ge_length);
+	initializeGenomicElementType('g2', m1, 1.0);
+	initializeGenomicElement(g2, sweep_site, sweep_site);
+	
+	
+	// Initialize arrays to store simulation parameters
+	N_values = integer(27, fill1=0);
+	mutation_rates = float(27);
+	recombination_rates = float(27);
+	burn_in_files = integer(27, fill1=0);
+	pi_nucleotide_diversity = float(27);
+	
+	// Read parameter combinations from parameter combinations.txt file
+	i = 0;
+	file = readFile("parameter_combinations.txt");
+	file = file[substr(file, 0, 1) != "N,"];
+	
+	for (line in file) {
+		tokens = strsplit(line, sep= ",");
+		//print("Line:"+ line); 
+		//print("Tokens:"+ tokens);  
+		N_values[i] = asInteger(tokens[0]);
+		mutation_rates[i] = asFloat(tokens[1]);
+		recombination_rates[i] = asFloat(tokens[2]);
+		burn_in_files[i] = asInteger(tokens[3]);
+		pi_nucleotide_diversity[i] = asFloat(tokens[5]);
+		
+		i = i + 1;
+	}
+	
+	// Set parameters for current combination
+	N = N_values[array_index-1];
+	mu = mutation_rates[array_index-1];
+	r = recombination_rates[array_index-1];
+	pi = pi_nucleotide_diversity[array_index-1];
+	
+	initializeMutationRate(mu);
+	initializeRecombinationRate(r);
+	defineConstant('pop_size', N);
+	defineConstant('nucleotide_diversity', pi);
+	
+	//seed is 
+	setSeed(seedID);
+	print("seedID: " + seedID);
+	
+	//print out parameters for checking on job logfile
+	print("for Array Index, seed:" + array_index + ','+ seedID);
+	print("population size:" + pop_size);
+	print ("recombination rate:" + r);
+	print("mutation rate:" + mu);
+	print('nucleotide diversity:'+ nucleotide_diversity);
+	print("genome size:" + ge_length);
+
+
+}
+
+function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
+{
+	sum =0;
+	div=0;
+	for (individual in sim.subpopulations.individuals) {
+		sum = sum + calcPairHeterozygosity(individual.genome1, individual.genome2, infiniteSites = F);
+	}
+	div = sum/pop_size;
+	return div;
+}
+
+
+
+
+// Main simulation
+
+1 late() {
+	// Read burn-in population from file
+	sim.readFromPopulationFile("burnin_no." + array_index + "_complete.trees");
+	
+	//setting tick number from the read in population file back to 1
+	//community.tick=1;
+	//sim.cycle = 1
+	catn('starting cycle no.: ' + sim.cycle);
+	
+	// The p0.tag variable will be used to store the number of independent lineages.
+	p0.tag = 0;
+	
+	// logfile
+	log = community.createLogFile(array_index + '_'+ seedID +".csv", logInterval=100);
+	log.addCustomColumn("Array Index", "array_index;");
+	log.addCustomColumn("SeedID", "seedID;");
+	log.addCycle();
+	log.addCustomColumn("Allele Frequency", "sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));");
+	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
+	log.addCustomColumn("No_lineages", "p0.tag;");
+	
+	// Add and modify mutation to sweep
+	sweep = sim.mutationsOfType(m1);
+	target = sample(p0.genomes, 1); //chooses one genome in the subpopulation to add the sweep mutation into
+	target.addNewDrawnMutation(m1, 5000); //add sweep mutation m1 at position 5000 in target genome
+	
+	// calculate allele frequency
+	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
+	catn('Starting generation: ' + sim.cycle +', seed_ID: ' + seedID + ', Allele Frequency: ' + allele_frequency);
+}
+
+//calculate allele frequency at set timepoints
+
+2:199999 late(){
+	//update number of lineages
+	if (p0.tag != sim.countOfMutationsOfType(m1)) {
+		p0.tag = sim.countOfMutationsOfType(m1);}
+	
+	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
+	catn('Generation: ' + sim.cycle +', seed_ID: ' + seedID + ', Allele Frequency: ' + allele_frequency);
+	if (allele_frequency >=0.4 ) {
+		catn(array_index +','+ seedID + ': swept to 40%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+		
+		// Count the number of lineages that have a frequency above the threshold
+		//Threshold = 1/(2*sample size of 200 genomes from 100 individuals) = 1/(2*200) =  2.5e-3
+		count = 0;
+		for (i in sim.mutationFrequencies(p0, sim.mutationsOfType(m1)) )
+			if (i>=2.5e-3) {
+				count = count + 1;}
+		catn('No. of lineages: '+ count) ;
+	
+	}
+	
+	if (allele_frequency >=0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle +", lineage(s):"+ p0.tag);
+		
+		// Count the number of lineages that have a frequency above the threshold
+		//Threshold = 1/(2*sample size of 200 genomes from 100 individuals) = 1/(2*200) =  2.5e-3
+		count = 0;
+		for (i in sim.mutationFrequencies(p0, sim.mutationsOfType(m1)) )
+			if (i>=2.5e-3) {
+				count = count + 1;}
+		catn('No. of lineages: '+ count) ;
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+}
+
+
+// Additional late() block for cutoff time point at 2000tick
+200000 late(){
+	allele_frequency = sum(sim.mutationFrequencies(p0, sim.mutationsOfType(m1)));
+	catn("array index, seedID: "+ array_index + "," + seedID + " TIME EXPIRED");
+	catn('generation: ' + sim.cycle +', Allele Frequency: ' + allele_frequency);
+	if (allele_frequency >=0.4 ) {
+		catn(array_index +','+ seedID + ': swept to 40%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_40.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	if (allele_frequency >=0.8 ) {
+		sim.simulationFinished();
+		catn(array_index +','+ seedID + ': swept to 80%');
+		catn('number of generations taken: ' + sim.cycle);
+		
+		//output random sample of individuals from population as vcf files? 
+		// or use outputMutations() and outputFixedMutations() for whole population BUT not in vcf format
+		p0.outputVCFSample(pop_size, outputMultiallelics = T, filePath = array_index + '_'+ seedID +'_80.vcf',  simplifyNucleotides = F);
+		//sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_simulation.trees");
+	
+	}
+	sim.simulationFinished();
+	sim.treeSeqOutput("combination_" + array_index + "_" + seedID + "_expired.trees");
+}

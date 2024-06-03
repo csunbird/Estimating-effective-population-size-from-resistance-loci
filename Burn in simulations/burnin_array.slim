@@ -52,10 +52,10 @@ initialize() {
 	r = recombination_rates[array_index-1];
 	//pi = pi_nucleotide_diversity[array_index-1];
 	
+	//initialise parameters
 	initializeMutationRate(mu);
 	initializeRecombinationRate(r);
 	defineConstant('pop_size', N);
-	//defineConstant('nucleotide_diversity', pi);
 	
 	// define function to calculate pi, the nucleotide diversity 
 	//if burn in has reached mutation-drift balance, pi is at expected theoretical mean heterozygosity and 
@@ -63,7 +63,11 @@ initialize() {
 	//theta is population-scaled mutation rate and is theta=4(Ne)(mutation rate)
 	theta = 4*mu*pop_size;
 	pi = theta/(1+2*theta);
-	termination_point =1.1*pi;
+	//termination_point =1.1*pi;
+	
+	
+	//defineConstant('nucleotide_diversity', pi);
+	defineConstant('termination_point', 1.1*pi);
 	
 	
 	//seed is 
@@ -75,7 +79,7 @@ initialize() {
 	print("population size:" + pop_size);
 	print ("recombination rate:" + r);
 	print("mutation rate:" + mu);
-	print("1.1*pi(termination point):" + termination_point);
+	print("1.1*pi is the termination point:" + termination_point);
 	//print('terminate at nucleotide diversity:'+ nucleotide_diversity);
 	print("genome size:" + ge_length);
 
@@ -107,7 +111,7 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 	
 	
 	//logfile heterozygosity at set timepoints
-	log = community.createLogFile("burnin" + array_index + "_logfile.csv", logInterval=100);
+	log = community.createLogFile("burnin" + array_index + "_logfile.csv", logInterval=500);
 	log.addCycle();
 	log.addCustomColumn("Heterozygosity", "estimatepop_Heterozygosity(p0);");
 	
@@ -119,9 +123,12 @@ function (float)estimatepop_Heterozygosity(o<Subpopulation>$ subpop)
 // print heterozygosity at each timepoint
 
 500:99999 late() {
+	//modify for 10k pop size to be every 500
 	// every 100 ticks, calculate heterozygosity
-	if (sim.cycle % 100 == 0) {
+	if (sim.cycle % 500 == 0) {
 		div = estimatepop_Heterozygosity(p0);
+		catn("tick:" + sim.cycle + ", nucleotide diversity:"+ div);
+		
 		//if tick number is greater than 5N, check if nucleotide_diversity >10% 
 		if (sim.cycle >= 5 * pop_size){
 			if (div >= termination_point) {
