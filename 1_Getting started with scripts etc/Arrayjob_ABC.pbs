@@ -1,0 +1,27 @@
+mkdir ABC_N=10000_D=1_s=0.1
+cd ABC_N=10000_D=1_s=0.1
+
+for i in `seq 1 10`
+do
+
+My_Dir="ABC_N=10000_D=1_s=0.1_"${i}
+My_Job=$My_Dir
+
+mkdir $My_Dir
+cd $My_Dir
+
+
+echo '#PBS -l walltime=08:00:00' > result.pbs
+echo '#PBS -l select=1:ncpus=4:ompthreads=4:mem=920gb' >> result.pbs
+echo 'export JULIA_NUM_THREADS=4' >> result.pbs
+echo 'cd $PBS_O_WORKDIR' >> result.pbs
+echo '~/julia-1.9.2/bin/julia < ../../Run_ABC_script_forparallel.jl' >> result.pbs
+
+
+qsub -N "ABC_job_"${i} result.pbs
+
+
+cd ..
+
+
+done
